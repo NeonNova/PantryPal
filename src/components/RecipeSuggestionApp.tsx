@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Loader2, ChefHat, Utensils, Sparkles, X, Search, Book, CornerDownLeft } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Badge } from "@/components/ui/badge"
@@ -163,17 +163,16 @@ const RecipeSuggestionApp: React.FC = () => {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <div className="relative">
-                  <Input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        onKeyDown={handleAddIngredient}
-                        placeholder="List your pantry ingredients one at a time"
-                        className="text-lg py-6 pl-12 border-2 border-teal-200 focus:border-teal-500 rounded-lg"
-                        />
-                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        <CornerDownLeft className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <Input
+                      type="text"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onKeyDown={handleAddIngredient}
+                      placeholder="List your pantry ingredients one at a time"
+                      className="text-lg py-6 pl-12 border-2 border-teal-200 focus:border-teal-500 rounded-lg"
+                    />
                     <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <CornerDownLeft className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   </div>
                   <div className="flex flex-wrap gap-2 min-h-[40px]">
                     {ingredients.map((ingredient, index) => (
@@ -259,8 +258,9 @@ const RecipeSuggestionApp: React.FC = () => {
                       </h3>
                       <ul className="space-y-2 text-gray-600 text-lg">
                         {selectedRecipe.ingredients.map((ingredient, index) => (
-                           
-                            <ReactMarkdown className="flex-1">{ingredient}</ReactMarkdown>
+                          <li key={ingredient}>
+                            <ReactMarkdown>{ingredient}</ReactMarkdown>
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -271,7 +271,9 @@ const RecipeSuggestionApp: React.FC = () => {
                       </h3>
                       <ol className="space-y-3 text-gray-600 text-lg">
                         {selectedRecipe.instructions.map((step, index) => (
-                            <ReactMarkdown className="flex-1 leading-relaxed">{step}</ReactMarkdown>
+                          <li key={step}>
+                            <ReactMarkdown>{step}</ReactMarkdown>
+                          </li>
                         ))}
                       </ol>
                     </div>

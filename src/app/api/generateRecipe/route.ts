@@ -7,13 +7,13 @@ export async function POST(request: Request) {
   const { ingredients, recipeName } = await request.json();
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
     let prompt: string;
 if (ingredients) {
   prompt = `You are a helpful AI assistant that suggests recipes based on available ingredients. Please suggest up to 9 classic recipes using the following ingredients: ${ingredients}. Only provide the names of the recipes, one per line. Focus on suggesting recipes that make the best use of these ingredients, prioritizing quality and coherence over using all ingredients. List them one per line in markdown format.`;
 } else if (recipeName) {
-  prompt = `You are a helpful AI assistant that provides detailed recipes. Please provide a detailed recipe for ${recipeName}. Include a list of ingredients with measurements and step-by-step instructions.`;
+  prompt = `You are a helpful AI assistant that provides detailed recipes. Please provide a detailed recipe for ${recipeName}. Include a list of ingredients with measurements and step-by-step instructions. Make sure to use markdown formatting for`;
 } else {
   return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
 }
