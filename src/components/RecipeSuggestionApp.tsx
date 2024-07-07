@@ -1,14 +1,22 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
-import { Loader2, ChefHat, Utensils, Sparkles, X, Search, Book, CornerDownLeft } from 'lucide-react'
+import { Loader2, ChefHat, Utensils, Sparkles, X, Search, Book, CornerDownLeft, Filter, ChevronDown } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 import ReactMarkdown from 'react-markdown'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 
 interface Recipe {
   id: number;
@@ -17,6 +25,28 @@ interface Recipe {
   instructions: string[];
 }
 
+interface Filters {
+  cuisine: string;
+  dietaryStyle: string;
+  mealType: string;
+}
+
+const commonIngredients = {
+    Vegetables: ['Tomatoes', 'Onions', 'Garlic', 'Potatoes', 'Carrots', 'Spinach', 'Bell Peppers', 'Cucumbers', 'Mushrooms', 'Zucchini', 'Broccoli', 'Green Beans', 'Celery', 'Asparagus', 'Cabbage', 'Brussels Sprouts', 'Kale', 'Peas', 'Artichokes', 'Eggplant', 'Lettuce', 'Radishes', 'Scallions', 'Sweet Potatoes', 'Corn', 'Okra', 'Bitter Gourd', 'Fenugreek Leaves'],
+    Fruits: ['Apples', 'Bananas', 'Oranges', 'Lemons', 'Strawberries', 'Blueberries', 'Raspberries', 'Avocado', 'Grapes', 'Mangoes', 'Pineapple', 'Peaches', 'Plums', 'Kiwi', 'Pears', 'Cherries', 'Watermelon', 'Pomegranate', 'Cantaloupe', 'Guava', 'Lychee'],
+    Proteins: ['Chicken', 'Beef', 'Pork', 'Eggs', 'Salmon', 'Shrimp', 'Tofu', 'Turkey', 'Lamb', 'Sardines', 'Paneer', 'Cottage Cheese', 'Yogurt', 'Black Beans', 'Kidney Beans', 'Cannellini Beans', 'Chickpeas', 'Lentils', 'Quinoa', 'Tempeh', 'Venison', 'Duck', 'Crab', 'Lobster'],
+    Grains: ['Rice', 'Pasta', 'Bread', 'Quinoa', 'Oats', 'Barley', 'Cornmeal', 'Couscous', 'Farro', 'Bulgur', 'Millet', 'Polenta', 'Rye', 'Chapati Flour', 'Semolina'],
+    Dairy: ['Milk', 'Cheese', 'Yogurt', 'Butter', 'Cream', 'Sour Cream', 'Paneer', 'Mozarella', 'Cheddar', 'Parmesan', 'Sliced Cheese', 'Cottage Cheese', 'Cream Cheese', 'Ricotta', 'Goat Cheese', 'Mascarpone'],
+    Spices: ['Salt', 'Pepper', 'Cumin', 'Paprika', 'Cinnamon', 'Oregano', 'Basil', 'Thyme', 'Chili Powder', 'Coriander', 'Turmeric', 'Ginger', 'Rosemary', 'Nutmeg', 'Cardamom', 'Cloves', 'Bay Leaves', 'Allspice', 'Fennel Seeds', 'Saffron', 'Mustard Seeds', 'Asafoetida'],
+    Pantry: ['Olive Oil', 'Vegetable Oil', 'Coconut Oil', 'Sesame Oil', 'Avocado Oil', 'Mustard Oil', 'Balsamic Vinegar', 'Red Wine Vinegar', 'Apple Cider Vinegar', 'Soy Sauce', 'Fish Sauce', 'Worcestershire Sauce', 'All-Purpose Flour', 'Whole Wheat Flour', 'White Sugar', 'Brown Sugar', 'Honey', 'Maple Syrup', 'Almonds', 'Walnuts', 'Pecans', 'Flaxseeds', 'Chia Seeds', 'Sunflower Seeds', 'Raisins', 'Cranberries', 'Baking Powder', 'Baking Soda', 'Cocoa Powder', 'Vanilla Extract', 'Cornstarch', 'Tamarind Paste', 'Garam Masala']
+  };
+  
+  
+  
+const cuisines = ['Any', 'Italian', 'Mexican', 'Chinese', 'Indian', 'Japanese', 'French', 'Mediterranean', 'American'];
+const dietaryStyles = ['Any', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Keto', 'Paleo', 'Low-Carb'];
+const mealTypes = ['Any', 'Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snack'];
+
 const RecipeSuggestionApp: React.FC = () => {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -24,21 +54,26 @@ const RecipeSuggestionApp: React.FC = () => {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('ingredients');
+  const [filters, setFilters] = useState<Filters>({ cuisine: 'Any', dietaryStyle: 'Any', mealType: 'Any' });
+  const [allergies, setAllergies] = useState<string[]>([]);
 
   useEffect(() => {
-    document.body.className = 'bg-gray-900 min-h-screen font-sans';
+    document.body.className = 'bg-black min-h-screen font-sans';
   }, []);
 
-  const handleAddIngredient = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleAddIngredient = (ingredient: string) => {
+    setIngredients(prevIngredients => {
+      return prevIngredients.includes(ingredient) 
+        ? prevIngredients 
+        : [...prevIngredients, ingredient];
+    });
+    setInputValue('');
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && inputValue.trim()) {
       e.preventDefault();
-      setIngredients(prevIngredients => {
-        const newIngredient = inputValue.trim();
-        return prevIngredients.includes(newIngredient) 
-          ? prevIngredients 
-          : [...prevIngredients, newIngredient];
-      });
-      setInputValue('');
+      handleAddIngredient(inputValue.trim());
     }
   };
 
@@ -55,7 +90,11 @@ const RecipeSuggestionApp: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ingredients: ingredients.join(', ') }),
+        body: JSON.stringify({ 
+          ingredients: ingredients.join(', '),
+          filters,
+          allergies
+        }),
       });
       const data = await response.json();
       const recipes = data.recipes.map((recipe: string, index: number) => ({
@@ -78,7 +117,11 @@ const RecipeSuggestionApp: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ recipeName: recipe.name }),
+        body: JSON.stringify({ 
+          recipeName: recipe.name,
+          filters,
+          allergies
+        }),
       });
       const data = await response.json();
       const fullRecipe = parseRecipe(data.recipe);
@@ -153,12 +196,12 @@ const RecipeSuggestionApp: React.FC = () => {
           transition={{ duration: 0.5, delay: 0.6 }}
           className="mt-2 sm:mt-4 max-w-2xl font-medium mx-auto text-base sm:text-xl text-pink-200"
         >
-          Transform your ingredients into culinary masterpieces
+          Get recipe ideas using stuff you already have  in your pantry!
         </motion.p>
       </motion.div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-4 sm:mb-8 bg-gray-800 rounded-lg p-1">
+      <TabsList className="grid w-full grid-cols-3 mb-8 bg-black rounded-lg p-1">
           {['ingredients', 'suggestions', 'recipe'].map((tab, index) => (
             <TabsTrigger
               key={tab}
@@ -166,7 +209,7 @@ const RecipeSuggestionApp: React.FC = () => {
               className={`text-xs sm:text-lg font-medium transition-all duration-300 
                 ${activeTab === tab 
                   ? 'bg-gradient-to-r from-pink-300 to-pink-400 text-indigo-500 font-medium shadow-lg' 
-                  : 'text-pink-200 font-medium hover:bg-gray-700'}`}
+                  : 'text-pink-200 font-medium hover:bg-black'}`}
             >
               <motion.div
                 initial={false}
@@ -199,21 +242,21 @@ const RecipeSuggestionApp: React.FC = () => {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="mb-4 sm:mb-8 overflow-hidden shadow-2xl hover:shadow-3xl transition-shadow duration-300 bg-gray-800 bg-opacity-50 backdrop-blur-lg">
-              <CardContent className="p-3 sm:p-6">
-                <div className="space-y-3 sm:space-y-6">
+            <Card className="mb-8 overflow-hidden shadow-2xl hover:shadow-3xl transition-shadow duration-300 ">
+              <CardContent className="p-6">
+                <div className="space-y-6">
                   <div className="space-y-2">
                     <div className="relative">
                       <Input
                         type="text"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        onKeyDown={handleAddIngredient}
-                        placeholder="List your pantry ingredients"
-                        className="text-sm sm:text-lg py-2 sm:py-4 pl-8 sm:pl-12 bg-gray-700 border-2 border-pink-300 focus:border-pink-500 rounded-lg text-pink-100 placeholder-pink-300"
+                        onKeyDown={handleInputKeyDown}
+                        placeholder="Enter the ingredients in your pantry "
+                        className="text-lg py-4 pl-12 bg-black border-2 border-pink-300 focus:border-pink-500 rounded-lg text-pink-100 placeholder-pink-300"
                       />
-                      <Search className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 text-pink-300 h-4 w-4 sm:h-5 sm:w-5" />
-                      <CornerDownLeft className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 text-pink-300 h-4 w-4 sm:h-5 sm:w-5" />
+                      <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-pink-300 h-5 w-5" />
+                      <CornerDownLeft className="absolute right-4 top-1/2 transform -translate-y-1/2 text-pink-300 h-5 w-5" />
                     </div>
                     <div className="flex flex-wrap gap-2 min-h-[40px]">
                       <AnimatePresence>
@@ -225,14 +268,14 @@ const RecipeSuggestionApp: React.FC = () => {
                             exit={{ opacity: 0, scale: 0.8 }}
                             transition={{ duration: 0.2 }}
                           >
-                            <Badge variant="secondary" className="px-2 py-1 text-xs sm:text-sm bg-pink-200 text-gray-800">
+                            <Badge variant="default" className="px-2 py-1 text-sm bg-pink-400 hover:bg-white text-white hover:text-black">
                               {ingredient}
                               <button 
                                 type="button" 
                                 onClick={() => removeIngredient(index)} 
-                                className="ml-1 sm:ml-2 text-gray-600 hover:text-gray-800"
+                                className="ml-2 text-white border-pink-300 hover:text-pink-600 "
                               >
-                                <X size={12} />
+                                <X size={16} />
                               </button>
                             </Badge>
                           </motion.div>
@@ -240,15 +283,142 @@ const RecipeSuggestionApp: React.FC = () => {
                       </AnimatePresence>
                     </div>
                   </div>
+                  
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="common-ingredients">
+                      <AccordionTrigger className="text-lg font-semibold text-pink-100">
+                        Common Ingredients
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-4">
+                          {Object.entries(commonIngredients).map(([category, items]) => (
+                            <div key={category}>
+                              <h4 className="text-sm font-medium text-pink-200 mb-2">{category}</h4>
+                              <div className="flex flex-wrap gap-2">
+                                {items.map((item) => (
+                                  <Badge
+                                    key={item}
+                                    variant="default"
+                                    className={`cursor-pointer ${
+                                      ingredients.includes(item) ? 'bg-pink-400 hover:bg-white text-white hover:text-black' : 'hover:bg-white bg-pink-400 hover:text-black text-white'
+                                    }`}
+                                    onClick={() => handleAddIngredient(item)}
+                                  >
+                                    {item}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="filters">
+                    <AccordionTrigger className="text-lg font-semibold text-pink-100">
+                        Filters
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <Select
+                            value={filters.cuisine || "Any"}
+                            onValueChange={(value) => setFilters({ ...filters, cuisine: value })}
+                        >
+                            <SelectTrigger className="bg-black border-pink-300">
+                            <SelectValue className="bg-black text-white">
+                                {filters.cuisine === "Any" ? "Pick a Cuisine" : filters.cuisine}
+                            </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent className="bg-pink-600  text-white">
+                            {cuisines.map((cuisine) => (
+                                <SelectItem key={cuisine} value={cuisine} className="bg-black text-white hover:bg-black">
+                                {cuisine}
+                                </SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
+
+                        <Select
+                            value={filters.dietaryStyle || "Any"}
+                            onValueChange={(value) => setFilters({ ...filters, dietaryStyle: value })}
+                        >
+                            <SelectTrigger className="bg-black border-pink-300">
+                            <SelectValue className="bg-black text-white">
+                                {filters.dietaryStyle === "Any" ? "Pick a Dietary Style" : filters.dietaryStyle}
+                            </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent className="bg-pink-600 text-white">
+                            {dietaryStyles.map((style) => (
+                                <SelectItem key={style} value={style} className="bg-black text-white hover:bg-black">
+                                {style}
+                                </SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
+
+                        <Select
+                            value={filters.mealType || "Any"}
+                            onValueChange={(value) => setFilters({ ...filters, mealType: value })}
+                        >
+                            <SelectTrigger className="bg-black border-pink-300">
+                            <SelectValue className="bg-black text-white">
+                                {filters.mealType === "Any" ? "Pick a Meal Type" : filters.mealType}
+                            </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent className="bg-pink-600 text-white">
+                            {mealTypes.map((type) => (
+                                <SelectItem key={type} value={type} className="bg-black text-white hover:bg-black">
+                                {type}
+                                </SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
+                        </div>
+                    </AccordionContent>
+                    </AccordionItem>
+
+
+                    <AccordionItem value="allergies">
+                      <AccordionTrigger className="text-lg font-semibold text-pink-100">
+                        Allergies / Ingredients to Avoid
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="flex flex-wrap gap-4">
+                          {['Nuts', 'Dairy', 'Gluten', 'Shellfish', 'Soy', 'Eggs'].map((allergy) => (
+                            <div key={allergy} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={allergy}
+                                checked={allergies.includes(allergy)}
+                                onCheckedChange={(checked) => {
+                                  setAllergies(
+                                    checked
+                                      ? [...allergies, allergy]
+                                      : allergies.filter((a) => a !== allergy)
+                                  );
+                                }}
+                              />
+                              <label
+                                htmlFor={allergy}
+                                className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
+                                {allergy}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+
                   <Button 
                     onClick={handleDiscoverRecipes}
-                    className="w-full bg-gradient-to-r from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white font-semibold py-2 sm:py-4 text-sm sm:text-lg rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+                    className="w-full bg-gradient-to-r from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white font-semibold py-4 text-lg rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
                     disabled={loading || ingredients.length === 0}
                   >
                     {loading ? (
-                      <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     ) : (
-                      <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                      <Sparkles className="mr-2 h-5 w-5" />
                     )}
                     Discover Recipes
                   </Button>
@@ -266,10 +436,10 @@ const RecipeSuggestionApp: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="space-y-3 sm:space-y-4"
+                className="space-y-4"
               >
-                <h3 className="text-base sm:text-xl font-semibold text-pink-100 mb-2 sm:mb-4">Recipe suggestions using your ingredients:</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                <h3 className="text-xl font-semibold text-pink-100 mb-4">Recipe suggestions based on your ingredients and preferences:</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {suggestions.map((recipe, index) => (
                     <motion.div
                       key={recipe.id}
@@ -277,12 +447,12 @@ const RecipeSuggestionApp: React.FC = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       whileHover={{ scale: 1.05 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-2 sm:p-4 cursor-pointer border border-pink-300 hover:border-pink-500"
+                      className="bg-black rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 cursor-pointer border border-pink-300 hover:border-pink-500"
                       onClick={() => handleRecipeClick(recipe)}
                     >
                       <div className="flex items-center">
-                        <Sparkles className="mr-2 h-3 w-3 sm:h-5 sm:w-5 text-pink-300 flex-shrink-0" />
-                        <ReactMarkdown className="text-xs sm:text-base text-pink-100">{recipe.name}</ReactMarkdown>
+                        <Sparkles className="mr-2 h-5 w-5 text-pink-300 flex-shrink-0" />
+                        <ReactMarkdown className="text-base text-pink-100">{recipe.name}</ReactMarkdown>
                       </div>
                     </motion.div>
                   ))}
@@ -301,20 +471,20 @@ const RecipeSuggestionApp: React.FC = () => {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="shadow-2xl bg-gray-800 border border-pink-300">
-                  <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-pink-400 to-pink-600">
-                    <ReactMarkdown className="text-lg sm:text-2xl font-bold text-white break-words">{selectedRecipe.name}</ReactMarkdown>
+                <Card className="shadow-2xl bg-blACK border border-pink-300">
+                  <CardHeader className="p-6 bg-gradient-to-r from-pink-400 to-pink-600">
+                    <ReactMarkdown className="text-2xl font-bold text-white break-words">{selectedRecipe.name}</ReactMarkdown>
                   </CardHeader>
-                  <CardContent className="p-3 sm:p-6 space-y-4 sm:space-y-6">
+                  <CardContent className="p-6 space-y-6">
                     <div>
-                      <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-pink-100 flex items-center">
-                        <Utensils className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-pink-300" />
+                      <h3 className="text-xl font-semibold mb-3 text-pink-100 flex items-center">
+                        <Utensils className="mr-2 h-5 w-5 text-pink-300" />
                         Ingredients
                       </h3>
-                      <ul className="space-y-1 sm:space-y-2 text-pink-200 text-sm sm:text-base">
+                      <ul className="space-y-2 text-pink-200 text-base">
                         {selectedRecipe.ingredients.map((ingredient, index) => (
                           <motion.li
-                            key={ingredient}
+                            key={index}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -327,20 +497,20 @@ const RecipeSuggestionApp: React.FC = () => {
                       </ul>
                     </div>
                     <div>
-                      <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-pink-100 flex items-center">
-                        <ChefHat className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-pink-300" />
+                      <h3 className="text-xl font-semibold mb-3 text-pink-100 flex items-center">
+                        <ChefHat className="mr-2 h-5 w-5 text-pink-300" />
                         Instructions
                       </h3>
-                      <ol className="space-y-2 sm:space-y-3 text-pink-200 text-sm sm:text-base list-decimal list-inside">
+                      <ol className="space-y-3 text-pink-200 text-base list-decimal list-outside ml-6">
                         {selectedRecipe.instructions.map((step, index) => (
                           <motion.li
-                            key={step}
+                            key={index}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.3, delay: index * 0.1 }}
                             className="pl-2"
                           >
-                            <ReactMarkdown className="inline break-words">{step}</ReactMarkdown>
+                            <ReactMarkdown className="break-words">{step}</ReactMarkdown>
                           </motion.li>
                         ))}
                       </ol>

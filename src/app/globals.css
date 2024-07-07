@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,16 +6,21 @@
 
 @layer base {
   html {
-    font-family: 'League Spartan', sans-serif;
+    font-family: 'Poppins', sans-serif;
   }
 }
 
 body {
-  @apply bg-gray-900 text-pink-100;
-  font-family: 'League Spartan', sans-serif;
+  @apply bg-slate-50 text-slate-800;
+  font-family: 'Poppins', sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6, p, div {
-  font-family: 'League Spartan', sans-serif;
-  font-weight: 500;
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+p, div {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
 }
