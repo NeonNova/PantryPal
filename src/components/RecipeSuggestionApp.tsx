@@ -26,7 +26,7 @@ const RecipeSuggestionApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState('ingredients');
 
   useEffect(() => {
-    document.body.className = 'bg-gradient-to-br from-teal-50 via-emerald-50 to-cyan-50 min-h-screen';
+    document.body.className = 'bg-gray-900 min-h-screen font-sans';
   }, []);
 
   const handleAddIngredient = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -125,110 +125,165 @@ const RecipeSuggestionApp: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 max-w-5xl">
+    <div className="container mx-auto px-4 py-8 sm:py-16 max-w-5xl text-pink-100">
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-center mb-16"
+        className="text-center mb-8 sm:mb-16"
       >
-        <ChefHat className="mx-auto h-24 w-24 text-teal-500" />
-        <h1 className="mt-6 text-5xl font-extrabold text-gray-900 sm:text-6xl sm:tracking-tight lg:text-7xl">
-          Pantry <span className="text-teal-500">Pal</span>
-        </h1>
-        <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-600 sm:text-2xl">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <ChefHat className="mx-auto h-16 w-16 sm:h-24 sm:w-24 text-pink-300" />
+        </motion.div>
+        <motion.h1
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="mt-4 sm:mt-6 text-4xl sm:text-6xl font-bold text-pink-100 sm:tracking-tight lg:text-7xl"
+        >
+          Pantry<span className="text-pink-300">Pal</span>
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="mt-2 sm:mt-4 max-w-2xl font-medium mx-auto text-lg sm:text-xl text-pink-200"
+        >
           Transform your ingredients into culinary masterpieces
-        </p>
+        </motion.p>
       </motion.div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-8">
-          <TabsTrigger value="ingredients" className="text-lg">
-            <Utensils className="mr-2 h-5 w-5" />
-            Ingredients
-          </TabsTrigger>
-          <TabsTrigger value="suggestions" className="text-lg">
-            <Sparkles className="mr-2 h-5 w-5" />
-            Suggestions
-          </TabsTrigger>
-          <TabsTrigger value="recipe" className="text-lg">
-            <Book className="mr-2 h-5 w-5" />
-            Recipe
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 mb-6 sm:mb-8 bg-gray-800 rounded-lg p-1">
+          {['ingredients', 'suggestions', 'recipe'].map((tab, index) => (
+            <TabsTrigger
+              key={tab}
+              value={tab}
+              className={`text-sm sm:text-lg font-medium transition-all duration-300 
+                ${activeTab === tab 
+                  ? 'bg-gradient-to-r from-pink-300 to-pink-400 text-indigo-500 font-medium shadow-lg' 
+                  : 'text-pink-200 font-medium hover:bg-gray-700'}`}
+            >
+              <motion.div
+                initial={false}
+                animate={{ 
+                  scale: activeTab === tab ? 1.05 : 1,
+                }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center justify-center h-full"
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  className="flex items-center"
+                >
+                  {tab === 'ingredients' && <Utensils className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />}
+                  {tab === 'suggestions' && <Sparkles className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />}
+                  {tab === 'recipe' && <Book className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />}
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </motion.div>
+              </motion.div>
+            </TabsTrigger>
+          ))}
         </TabsList>
 
+
         <TabsContent value="ingredients">
-          <Card className="mb-12 overflow-hidden shadow-2xl hover:shadow-3xl transition-shadow duration-300 bg-white bg-opacity-90 backdrop-blur-lg">
-            <CardContent className="p-8">
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Input
-                      type="text"
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      onKeyDown={handleAddIngredient}
-                      placeholder="List your pantry ingredients one at a time"
-                      className="text-lg py-6 pl-12 border-2 border-teal-200 focus:border-teal-500 rounded-lg"
-                    />
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <CornerDownLeft className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Card className="mb-6 sm:mb-12 overflow-hidden shadow-2xl hover:shadow-3xl transition-shadow duration-300 bg-gray-800 bg-opacity-50 backdrop-blur-lg">
+              <CardContent className="p-4 sm:p-8">
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onKeyDown={handleAddIngredient}
+                        placeholder="List your pantry ingredients"
+                        className="text-base sm:text-lg py-4 sm:py-6 pl-10 sm:pl-12 bg-gray-700 border-2 border-pink-300 focus:border-pink-500 rounded-lg text-pink-100 placeholder-pink-300"
+                      />
+                      <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-pink-300 h-4 w-4 sm:h-5 sm:w-5" />
+                      <CornerDownLeft className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-pink-300 h-4 w-4 sm:h-5 sm:w-5" />
+                    </div>
+                    <div className="flex flex-wrap gap-2 min-h-[40px]">
+                      <AnimatePresence>
+                        {ingredients.map((ingredient, index) => (
+                          <motion.div
+                            key={ingredient}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <Badge variant="secondary" className="px-2 py-1 sm:px-3 sm:py-2 text-sm sm:text-base bg-pink-200 text-gray-800">
+                              {ingredient}
+                              <button 
+                                type="button" 
+                                onClick={() => removeIngredient(index)} 
+                                className="ml-1 sm:ml-2 text-gray-600 hover:text-gray-800"
+                              >
+                                <X size={14} />
+                              </button>
+                            </Badge>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2 min-h-[40px]">
-                    {ingredients.map((ingredient, index) => (
-                      <Badge key={index} variant="secondary" className="px-3 py-2 text-base bg-teal-100 text-teal-800">
-                        {ingredient}
-                        <button 
-                          type="button" 
-                          onClick={() => removeIngredient(index)} 
-                          className="ml-2 text-teal-600 hover:text-teal-800"
-                        >
-                          <X size={16} />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
+                  <Button 
+                    onClick={handleDiscoverRecipes}
+                    className="w-full bg-gradient-to-r from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white font-semibold py-4 sm:py-6 text-lg sm:text-xl rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+                    disabled={loading || ingredients.length === 0}
+                  >
+                    {loading ? (
+                      <Loader2 className="mr-2 h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
+                    ) : (
+                      <Sparkles className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
+                    )}
+                    Discover Recipes
+                  </Button>
                 </div>
-                <Button 
-                  onClick={handleDiscoverRecipes}
-                  className="w-full bg-gradient-to-r from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600 text-white font-semibold py-6 text-xl rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-                  disabled={loading || ingredients.length === 0}
-                >
-                  {loading ? (
-                    <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                  ) : (
-                    <Sparkles className="mr-2 h-6 w-6" />
-                  )}
-                  Discover Recipes
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </motion.div>
         </TabsContent>
 
         <TabsContent value="suggestions">
           <AnimatePresence>
             {suggestions.length > 0 && (
               <motion.div
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 50 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
                 className="space-y-4"
               >
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Recipe suggestions using your ingredients:</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <h3 className="text-lg sm:text-xl font-semibold text-pink-100 mb-2 sm:mb-4">Recipe suggestions using your ingredients:</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {suggestions.map((recipe, index) => (
                     <motion.div
                       key={recipe.id}
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
+                      whileHover={{ scale: 1.05 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-4 cursor-pointer"
+                      className="bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-3 sm:p-4 cursor-pointer border border-pink-300 hover:border-pink-500"
                       onClick={() => handleRecipeClick(recipe)}
                     >
                       <div className="flex items-center">
-                        <Sparkles className="mr-2 h-5 w-5 text-teal-500 flex-shrink-0" />
-                        <ReactMarkdown>{recipe.name}</ReactMarkdown>
+                        <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-pink-300 flex-shrink-0" />
+                        <ReactMarkdown className="text-sm sm:text-base text-pink-100">{recipe.name}</ReactMarkdown>
                       </div>
                     </motion.div>
                   ))}
@@ -242,38 +297,52 @@ const RecipeSuggestionApp: React.FC = () => {
           <AnimatePresence>
             {selectedRecipe && (
               <motion.div
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 50 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
               >
-                <Card className="shadow-2xl bg-white">
-                  <CardHeader className="p-8 bg-gradient-to-r from-teal-100 to-cyan-100">
-                    <ReactMarkdown className="text-3xl font-bold text-gray-800">{selectedRecipe.name}</ReactMarkdown>
+                <Card className="shadow-2xl bg-gray-800 border border-pink-300">
+                  <CardHeader className="p-4 sm:p-8 bg-gradient-to-r from-pink-400 to-pink-600">
+                    <ReactMarkdown className="text-xl sm:text-3xl font-bold text-white break-words">{selectedRecipe.name}</ReactMarkdown>
                   </CardHeader>
-                  <CardContent className="p-8 space-y-8">
+                  <CardContent className="p-4 sm:p-8 space-y-6 sm:space-y-8">
                     <div>
-                      <h3 className="text-2xl font-semibold mb-4 text-gray-700 flex items-center">
-                        <Utensils className="mr-2 h-6 w-6 text-teal-500" />
+                      <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-pink-100 flex items-center">
+                        <Utensils className="mr-2 h-5 w-5 sm:h-6 sm:w-6 text-pink-300" />
                         Ingredients
                       </h3>
-                      <ul className="space-y-2 text-gray-600 text-lg">
+                      <ul className="space-y-2 text-pink-200 text-base sm:text-lg">
                         {selectedRecipe.ingredients.map((ingredient, index) => (
-                          <li key={ingredient}>
-                            <ReactMarkdown>{ingredient}</ReactMarkdown>
-                          </li>
+                          <motion.li
+                            key={ingredient}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.1 }}
+                            className="flex items-start"
+                          >
+                            <span className="mr-2 text-pink-300">•</span>
+                            <ReactMarkdown className="break-words">{ingredient}</ReactMarkdown>
+                          </motion.li>
                         ))}
                       </ul>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-semibold mb-4 text-gray-700 flex items-center">
-                        <ChefHat className="mr-2 h-6 w-6 text-teal-500" />
+                      <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-pink-100 flex items-center">
+                        <ChefHat className="mr-2 h-5 w-5 sm:h-6 sm:w-6 text-pink-300" />
                         Instructions
                       </h3>
-                      <ol className="space-y-3 text-gray-600 text-lg">
+                      <ol className="space-y-3 text-pink-200 text-base sm:text-lg list-decimal list-inside">
                         {selectedRecipe.instructions.map((step, index) => (
-                          <li key={step}>
-                            <ReactMarkdown>{step}</ReactMarkdown>
-                          </li>
+                          <motion.li
+                            key={step}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.1 }}
+                            className="pl-2"
+                          >
+                            <ReactMarkdown className="inline break-words">{step}</ReactMarkdown>
+                          </motion.li>
                         ))}
                       </ol>
                     </div>
