@@ -26,7 +26,7 @@ export async function POST(request: Request) {
        - Meal Type: ${filters.mealType}
     8. Avoid recipes containing the following allergens or ingredients to avoid: ${allergies.join(', ')}
     
-    Example format: (Only provide the names of the recipes, one per line, in markdown list format)
+    Example format: (Only provide the names of the recipes, one per line, in markdown list format NO HELPING OR INTRODUCTORY TEXT WHATSOEVER)
     - Recipe 1 
     - Recipe 2 
     - Recipe 3 `;
