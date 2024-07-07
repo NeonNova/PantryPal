@@ -56,6 +56,7 @@ const RecipeSuggestionApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState('ingredients');
   const [filters, setFilters] = useState<Filters>({ cuisine: 'Any', dietaryStyle: 'Any', mealType: 'Any' });
   const [allergies, setAllergies] = useState<string[]>([]);
+  const [loadingRecipe, setLoadingRecipe] = useState<number | null>(null);
 
   useEffect(() => {
     document.body.className = 'bg-black min-h-screen font-sans';
@@ -110,7 +111,8 @@ const RecipeSuggestionApp: React.FC = () => {
   };
 
   const handleRecipeClick = async (recipe: { id: number; name: string }) => {
-    setLoading(true);
+    if (loadingRecipe !== null) return; // Prevent multiple clicks
+    setLoadingRecipe(recipe.id);
     try {
       const response = await fetch('/api/generateRecipe', {
         method: 'POST',
@@ -135,8 +137,8 @@ const RecipeSuggestionApp: React.FC = () => {
     } catch (error) {
       console.error('Error generating full recipe:', error);
     }
-    setLoading(false);
-  };
+    setLoadingRecipe(null);
+};
 
   const parseRecipe = (recipeText: string) => {
     const lines = recipeText.split('\n');
@@ -429,98 +431,102 @@ const RecipeSuggestionApp: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="suggestions">
-          <AnimatePresence>
-            {suggestions.length > 0 && (
+    <AnimatePresence>
+      {suggestions.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-4"
+        >
+          <h3 className="text-xl font-semibold text-pink-100 mb-4">Recipe suggestions based on your ingredients and preferences:</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {suggestions.map((recipe, index) => (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-4"
+                key={recipe.id}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                className="bg-black rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 cursor-pointer border border-pink-300 hover:border-pink-500 relative"
+                onClick={() => handleRecipeClick(recipe)}
               >
-                <h3 className="text-xl font-semibold text-pink-100 mb-4">Recipe suggestions based on your ingredients and preferences:</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {suggestions.map((recipe, index) => (
-                    <motion.div
-                      key={recipe.id}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="bg-black rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 cursor-pointer border border-pink-300 hover:border-pink-500"
-                      onClick={() => handleRecipeClick(recipe)}
-                    >
-                      <div className="flex items-center">
-                        <Sparkles className="mr-2 h-5 w-5 text-pink-300 flex-shrink-0" />
-                        <ReactMarkdown className="text-base text-pink-100">{recipe.name}</ReactMarkdown>
-                      </div>
-                    </motion.div>
-                  ))}
+                <div className="flex items-center">
+                  {loadingRecipe === recipe.id ? (
+                    <Loader2 className="mr-2 h-5 w-5 text-pink-300 animate-spin" />
+                  ) : (
+                    <Sparkles className="mr-2 h-5 w-5 text-pink-300 flex-shrink-0" />
+                  )}
+                  <ReactMarkdown className="text-base text-pink-100">{recipe.name}</ReactMarkdown>
                 </div>
+                {loadingRecipe === recipe.id && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                    <Loader2 className="h-8 w-8 text-pink-300 animate-spin" />
+                  </div>
+                )}
               </motion.div>
-            )}
-          </AnimatePresence>
-        </TabsContent>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </TabsContent>
 
-        <TabsContent value="recipe">
-          <AnimatePresence>
-            {selectedRecipe && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card className="shadow-2xl bg-blACK border border-pink-300">
-                  <CardHeader className="p-6 bg-gradient-to-r from-pink-400 to-pink-600">
-                    <ReactMarkdown className="text-2xl font-bold text-white break-words">{selectedRecipe.name}</ReactMarkdown>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-6">
-                    <div>
-                      <h3 className="text-xl font-semibold mb-3 text-pink-100 flex items-center">
-                        <Utensils className="mr-2 h-5 w-5 text-pink-300" />
-                        Ingredients
-                      </h3>
-                      <ul className="space-y-2 text-pink-200 text-base">
-                        {selectedRecipe.ingredients.map((ingredient, index) => (
-                          <motion.li
-                            key={index}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3, delay: index * 0.1 }}
-                            className="flex items-start"
-                          >
-                            <span className="mr-2 text-pink-300">•</span>
-                            <ReactMarkdown className="break-words">{ingredient}</ReactMarkdown>
-                          </motion.li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-semibold mb-3 text-pink-100 flex items-center">
-                        <ChefHat className="mr-2 h-5 w-5 text-pink-300" />
-                        Instructions
-                      </h3>
-                      <ol className="space-y-3 text-pink-200 text-base list-decimal list-outside ml-6">
-                        {selectedRecipe.instructions.map((step, index) => (
-                          <motion.li
-                            key={index}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3, delay: index * 0.1 }}
-                            className="pl-2"
-                          >
-                            <ReactMarkdown className="break-words">{step}</ReactMarkdown>
-                          </motion.li>
-                        ))}
-                      </ol>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </TabsContent>
+  <TabsContent value="recipe">
+  <AnimatePresence>
+    {selectedRecipe && (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Card className="shadow-2xl bg-black border border-pink-300">
+          <CardHeader className="p-6 bg-gradient-to-r from-pink-400 to-pink-600">
+            <ReactMarkdown className="text-2xl font-bold text-white break-words">{selectedRecipe.name}</ReactMarkdown>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <div>
+              <h3 className="text-xl font-semibold mb-3 text-pink-100 flex items-center">
+                <Utensils className="mr-2 h-5 w-5 text-pink-300" />
+                Ingredients
+              </h3>
+              <div className="space-y-4 text-pink-200 text-base">
+                {selectedRecipe.ingredients.map((ingredient, index) => (
+                  <React.Fragment key={index}>
+                    {ingredient.startsWith("For ") ? (
+                      <h4 className="font-semibold text-pink-300 mt-2">{ingredient}</h4>
+                    ) : (
+                      <div className="flex items-start">
+                        <span className="mr-2 text-pink-300">•</span>
+                        <ReactMarkdown className="break-words">{ingredient}</ReactMarkdown>
+                      </div>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold mb-3 text-pink-100 flex items-center">
+                <ChefHat className="mr-2 h-5 w-5 text-pink-300" />
+                Instructions
+              </h3>
+              <ul className="space-y-3 text-pink-200 text-base">
+                {selectedRecipe.instructions.map((step, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="mr-2 text-pink-300">•</span>
+                    <ReactMarkdown className="break-words">{step}</ReactMarkdown>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    )}
+  </AnimatePresence>
+</TabsContent>
       </Tabs>
     </div>
   );

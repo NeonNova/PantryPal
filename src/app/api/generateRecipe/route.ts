@@ -10,8 +10,10 @@ export async function POST(request: Request) {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
     let prompt: string;
+    let availableIngredients: string = '';
     
     if (ingredients) {
+      availableIngredients = ingredients;
       prompt = `You are a helpful AI assistant that suggests recipes based on available ingredients and user preferences. Please suggest up to 9 classic recipes using the following ingredients: ${ingredients}. Follow these guidelines:
     
     1. Treat the provided ingredients as the main contents of a pantry.
@@ -25,21 +27,27 @@ export async function POST(request: Request) {
        - Dietary Style: ${filters.dietaryStyle}
        - Meal Type: ${filters.mealType}
     8. Avoid recipes containing the following allergens or ingredients to avoid: ${allergies.join(', ')}
+    9. Do not include any brackets or parentheses in the recipe names.
     
     Example format: (Only provide the names of the recipes, one per line, in markdown list format NO HELPING OR INTRODUCTORY TEXT WHATSOEVER)
     - Recipe 1 
     - Recipe 2 
     - Recipe 3 `;
     } else if (recipeName) {
-      prompt = `You are a helpful AI assistant that provides detailed recipes. Please provide a detailed recipe for ${recipeName}. Include two main sections, a list of ingredients with measurements and step-by-step instructions. Use markdown formatting for headers, lists, and emphasis where appropriate. Consider the following preferences:
+      prompt = `You are a helpful AI assistant that provides detailed recipes. Please provide a detailed recipe for ${recipeName}. Include two main sections, a list of ingredients with measurements and step-by-step instructions. Use markdown formatting for headers, lists, and emphasis where appropriate. Consider the following preferences and requirements:
       
       - Cuisine: ${filters.cuisine}
       - Dietary Style: ${filters.dietaryStyle}
       - Meal Type: ${filters.mealType}
       - Avoid these allergens or ingredients: ${allergies.join(', ')}
+      - Available ingredients: ${availableIngredients}
       
-      Include two main sections, a list of ingredients with measurements and step-by-step instructions.
-      Adjust the recipe as needed to accommodate these preferences and restrictions.`;
+      Instructions:
+      1. Include two main sections: a list of ingredients with measurements and step-by-step instructions. 
+      2. Adjust the recipe as needed to accommodate these preferences and restrictions.
+      3. Prioritize using the available ingredients listed above.
+      4. If substitutions or additional ingredients are necessary, clearly indicate this in the recipe.
+      5. Ensure the recipe name does not contain any brackets or parentheses.`;
     } else {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
@@ -49,7 +57,9 @@ export async function POST(request: Request) {
     const content = response.text();
 
     if (ingredients) {
-      const recipes = content.split('\n').filter(recipe => recipe.trim() !== '');
+      const recipes = content.split('\n')
+        .filter(recipe => recipe.trim() !== '')
+        .map(recipe => recipe.replace(/[-*]\s*/, '').trim());
       return NextResponse.json({ recipes });
     } else {
       return NextResponse.json({ recipe: content });
