@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   const { ingredients, recipeName, filters, allergies } = await request.json();
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     let prompt: string;
     let availableIngredients: string = '';
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     - Recipe 2 
     - Recipe 3 `;
     } else if (recipeName) {
-      prompt = `You are a helpful AI assistant that provides detailed recipes. Please provide a detailed recipe for ${recipeName}. Include two main sections, a list of ingredients with measurements and step-by-step instructions. Use markdown formatting for headers, lists, and emphasis where appropriate. Consider the following preferences and requirements:
+      prompt = `You are a helpful AI assistant that provides detailed recipes. Do not ask any additional questions or for preferences. Just provide a complete recipe." Please provide a detailed recipe for ${recipeName}. Include two main sections, a list of ingredients with measurements and step-by-step instructions. Use markdown formatting for headers, lists, and emphasis where appropriate. Consider the following preferences and requirements:
       
       - Cuisine: ${filters.cuisine}
       - Dietary Style: ${filters.dietaryStyle}
